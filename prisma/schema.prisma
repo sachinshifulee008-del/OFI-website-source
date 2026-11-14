@@ -1,0 +1,50 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// NASA microgravity combustion research investigation record.
+// All content is curated from public NASA / peer-reviewed sources.
+model Investigation {
+  id               String   @id @default(cuid())
+  code             String   @unique // OFI catalogue code, e.g. "FLEX"
+  name             String
+  category         String // Droplet Combustion | Solid Fuel | Spacecraft Fire Safety | Soot & Smoke | Gaseous Flames
+  objective        String
+  summary          String
+  gravityCondition String
+  facility         String
+  platform         String
+  status           String // Completed | Active | Preliminary Results
+  launchYear       Int? // Only populated when verified by a public source
+  delivery         String? // e.g. "SpaceX CRS-11"
+  researchAreas    String // JSON string[]
+  fuelsMaterials   String // JSON string[]
+  keyFindings      String // JSON string[]
+  variables        String // JSON { name: string; unit: string | null }[]
+  doi              String?
+  sourceUrl        String?
+  ntrsUrl          String?
+  datasetAvailable Boolean  @default(false)
+  measurementData  Boolean  @default(false)
+  sources          Source[]
+  createdAt        DateTime @default(now())
+}
+
+// Verified publications / reports / mission pages backing an investigation.
+model Source {
+  id             String  @id @default(cuid())
+  investigation  Investigation @relation(fields: [investigationId], references: [id])
+  investigationId String
+  title          String
+  authors        String
+  year           Int?
+  venue          String
+  kind           String // report | journal | web | news
+  doi            String?
+  url            String?
+}
